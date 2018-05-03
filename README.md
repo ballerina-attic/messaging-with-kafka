@@ -30,8 +30,8 @@ In this example, the Ballerina Kafka Connector is used to connect Ballerina to A
 - [Ballerina Distribution](https://ballerina.io/learn/getting-started/)
 - [Apache Kafka 1.1.0](https://kafka.apache.org/downloads)
   * Download the binary distribution and extract the contents
-- [Ballerina Kafka Connector](https://github.com/wso2-ballerina/package-kafka)
-  * After downloading and extracting, build it using maven and copy its .jar files into the `<BALLERINA_HOME>/bre/lib` folder
+- [Ballerina Kafka Connector](https://github.com/wso2-ballerina/package-kafka/releases/download/v0.96.0/ballerina-kafka-connector-0.96.0.zip)
+  * After downloading the ZIP file, extract it and copy the containing JAR files into the <BALLERINA_HOME>/bre/lib folder
 - A Text Editor or an IDE 
 
 ### Optional Requirements
