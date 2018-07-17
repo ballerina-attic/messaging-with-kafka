@@ -19,7 +19,7 @@ script:
 - STRING2="Downloading Ballerina-Kafka connector jars..."
 
 # Declare variable for Ballerina version
-- BALLERINA_VERSION=0.976.1-SNAPSHOT
+- BALLERINA_VERSION=0.980.0
 - DISTRIBUTION_NAME=ballerina-platform-$BALLERINA_VERSION
 
 # Declare variable for Kafka version
