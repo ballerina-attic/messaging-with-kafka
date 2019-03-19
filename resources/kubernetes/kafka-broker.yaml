@@ -1,4 +1,4 @@
-# Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+# Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,28 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+---
 kind: Deployment
+apiVersion: extensions/v1beta1
 metadata:
-  name: kafka-deployment
-  labels:
-    app: kafka
+  name: kafka-broker0
 spec:
-  replicas: 1
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
         app: kafka
+        id: "0"
     spec:
       containers:
-      - image: spotify/kafka:latest
-        name: kafka
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 2181
-          name: kafka
-
-
-
+        - name: kafka
+          image: wurstmeister/kafka
+          ports:
+            - containerPort: 9092
