@@ -29,3 +29,12 @@ spec:
           image: wurstmeister/kafka
           ports:
             - containerPort: 9092
+          env:
+            - name: KAFKA_ADVERTISED_PORT
+              value: <KAFKA_SERVICE_PORT>
+            - name: KAFKA_ADVERTISED_HOST_NAME
+              value: <KAFKA_SERVICE_HOST>
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: zoo1:2181
+            - name: KAFKA_BROKER_ID
+              value: "0"
