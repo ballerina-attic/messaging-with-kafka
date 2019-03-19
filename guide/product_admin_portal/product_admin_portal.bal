@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/log;
 import wso2/kafka;
 import ballerinax/kubernetes;
 
@@ -68,7 +69,10 @@ service productAdminService on httpListener {
         if (reqPayload is error) {
             response.statusCode = 400;
             response.setJsonPayload({ "Message": "Invalid payload - Not a valid JSON payload" });
-            _ = caller->respond(response);
+            var result = caller->respond(response);
+            if (result is error) {
+                log:printError("Failed to send response", err = result);
+            }
         } else {
             json username = reqPayload.Username;
             json password = reqPayload.Password;
@@ -79,7 +83,10 @@ service productAdminService on httpListener {
             if (username == null || password == null || productName == null || newPrice == null) {
                 response.statusCode = 400;
                 response.setJsonPayload({ "Message": "Bad Request: Invalid payload" });
-                _ = caller->respond(response);
+                var result = caller->respond(response);
+                if (result is error) {
+                    log:printError("Failed to send response", err = result);
+                }
             }
 
             // Convert the price value to float
@@ -87,7 +94,10 @@ service productAdminService on httpListener {
             if (result is error) {
                 response.statusCode = 400;
                 response.setJsonPayload({ "Message": "Invalid amount specified" });
-                _ = caller->respond(response);
+                result = caller->respond(response);
+                if (result is error) {
+                    log:printError("Failed to send response", err = result);
+                }
             } else {
                 newPriceAmount = result;
             }
@@ -97,7 +107,10 @@ service productAdminService on httpListener {
             if (username.toString() != ADMIN_USERNAME || password.toString() != ADMIN_PASSWORD) {
                 response.statusCode = 403;
                 response.setJsonPayload({ "Message": "Access Forbidden" });
-                _ = caller->respond(response);
+                result = caller->respond(response);
+                if (result is error) {
+                    log:printError("Failed to send response", err = result);
+                }
             }
 
             // Construct and serialize the message to be published to the Kafka topic
@@ -108,13 +121,20 @@ service productAdminService on httpListener {
             var sendResult = kafkaProducer->send(serializedMsg, "product-price", partition = 0);
             // Send internal server error if the sending has failed
             if (sendResult is error) {
+                log:printError("Failed to send to Kafka", err = sendResult);
                 response.statusCode = 500;
                 response.setJsonPayload({ "Message": "Kafka producer failed to send data" });
-                _ = caller->respond(response);
+                result = caller->respond(response);
+                if (result is error) {
+                    log:printError("Failed to send response", err = result);
+                }
             }
             // Send a success status to the admin request
             response.setJsonPayload({ "Status": "Success" });
-            _ = caller->respond(response);
+            result = caller->respond(response);
+            if (result is error) {
+                log:printError("Failed to send response", err = result);
+            }
         }
     }
 }
