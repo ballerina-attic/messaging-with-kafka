@@ -94,9 +94,9 @@ service productAdminService on httpListener {
             if (result is error) {
                 response.statusCode = 400;
                 response.setJsonPayload({ "Message": "Invalid amount specified" });
-                result = caller->respond(response);
-                if (result is error) {
-                    log:printError("Failed to send response", err = result);
+                var responseResult = caller->respond(response);
+                if (responseResult is error) {
+                    log:printError("Failed to send response", err = responseResult);
                 }
             } else {
                 newPriceAmount = result;
@@ -107,9 +107,9 @@ service productAdminService on httpListener {
             if (username.toString() != ADMIN_USERNAME || password.toString() != ADMIN_PASSWORD) {
                 response.statusCode = 403;
                 response.setJsonPayload({ "Message": "Access Forbidden" });
-                result = caller->respond(response);
+                var responseResult = caller->respond(response);
                 if (result is error) {
-                    log:printError("Failed to send response", err = result);
+                    log:printError("Failed to send response", err = responseResult);
                 }
             }
 
@@ -124,16 +124,16 @@ service productAdminService on httpListener {
                 log:printError("Failed to send to Kafka", err = sendResult);
                 response.statusCode = 500;
                 response.setJsonPayload({ "Message": "Kafka producer failed to send data" });
-                result = caller->respond(response);
-                if (result is error) {
-                    log:printError("Failed to send response", err = result);
+                var responseResult = caller->respond(response);
+                if (responseResult is error) {
+                    log:printError("Failed to send response", err = responseResult);
                 }
             }
             // Send a success status to the admin request
             response.setJsonPayload({ "Status": "Success" });
-            result = caller->respond(response);
-            if (result is error) {
-                log:printError("Failed to send response", err = result);
+            var responseResult = caller->respond(response);
+            if (responseResult is error) {
+                log:printError("Failed to send response", err = responseResult);
             }
         }
     }
