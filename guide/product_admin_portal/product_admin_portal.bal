@@ -75,8 +75,8 @@ service productAdminService on httpListener {
             }
         } else {
             response.statusCode = 200;
-            response.setJsonPayload(reqPayload);
-            var result = caller->respond(untaint response);
+            response.setJsonPayload(untaint reqPayload);
+            var result = caller->respond(response);
             if (result is error) {
                 log:printError("Failed to send response", err = result);
             }
