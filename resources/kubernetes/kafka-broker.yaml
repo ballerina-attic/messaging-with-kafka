@@ -25,8 +25,9 @@ spec:
         id: "0"
     spec:
       containers:
-        - name: kafka
-          image: wurstmeister/kafka
+        - image: wurstmeister/kafka
+          name: kafka
+          imagePullPolicy: Always
           ports:
             - containerPort: 9092
           env:
