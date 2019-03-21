@@ -1,4 +1,4 @@
-# Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+# Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+---
 kind: Deployment
+apiVersion: extensions/v1beta1
 metadata:
-  name: kafka-deployment
-  labels:
-    app: kafka
+  name: zookeeper-deployment
 spec:
-  replicas: 1
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
-        app: kafka
+        app: zookeeper
     spec:
       containers:
-        - image: spotify/kafka:latest
-          name: kafka
-          imagePullPolicy: IfNotPresent
+        - name: zoo
+          image: digitalwonderland/zookeeper
           ports:
             - containerPort: 2181
-              name: kafka
+          env:
+            - name: ZOOKEEPER_ID
+              value: "1"
+            - name: ZOOKEEPER_SERVER_1
+              value: zoo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zoo
+  labels:
+    app: zookeeper
+spec:
+  ports:
+    - name: client
+      port: 2181
+      protocol: TCP
+    - name: follower
+      port: 2888
+      protocol: TCP
+    - name: leader
+      port: 3888
+      protocol: TCP
+  selector:
+    app: zookeeper
