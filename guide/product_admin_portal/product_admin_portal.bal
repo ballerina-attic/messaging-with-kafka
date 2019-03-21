@@ -90,14 +90,14 @@ service productAdminService on httpListener {
             if (username == null || password == null || productName == null || newPrice == null) {
                 response.statusCode = 400;
                 response.setJsonPayload({ "Message": "Bad Request: Invalid payload" });
-                var result = caller->respond(response);
+                result = caller->respond(response);
                 if (result is error) {
                     log:printError("Failed to send response", err = result);
                 }
             }
 
             // Convert the price value to float
-            var result = float.convert(newPrice.toString());
+            result = float.convert(newPrice.toString());
             if (result is error) {
                 response.statusCode = 400;
                 response.setJsonPayload({ "Message": "Invalid amount specified" });
