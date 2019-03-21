@@ -12,19 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
 apiVersion: v1
 kind: Service
 metadata:
   name: kafka-service
   labels:
-    name: kafka
+    app: kafka
 spec:
   ports:
-    - port: 9092
-      name: kafka-port
-      protocol: TCP
+    - port: 2181
   selector:
     app: kafka
-    id: "0"
-  type: LoadBalancer
