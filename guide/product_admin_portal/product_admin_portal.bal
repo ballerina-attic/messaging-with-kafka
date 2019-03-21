@@ -83,7 +83,7 @@ service productAdminService on httpListener {
             if (username == null || password == null || productName == null || newPrice == null) {
                 response.statusCode = 400;
                 response.setJsonPayload({ "Message": "Bad Request: Invalid payload" });
-                result = caller->respond(response);
+                var result = caller->respond(response);
                 if (result is error) {
                     log:printError("Failed to send response", err = result);
                 }
@@ -108,7 +108,7 @@ service productAdminService on httpListener {
                 response.statusCode = 403;
                 response.setJsonPayload({ "Message": "Access Forbidden" });
                 var responseResult = caller->respond(response);
-                if (result is error) {
+                if (responseResult is error) {
                     log:printError("Failed to send response", err = responseResult);
                 }
             }
