@@ -47,7 +47,7 @@ kafka:SimpleProducer kafkaProducer = new(producerConfigs);
     image:"ballerina.guides.io/product_admin_portal:v1.0",
     name:"ballerina-guides-product-admin-portal",
     copyFiles:[{target:"/ballerina/runtime/bre/lib",
-        source:<path_to_kafka_connector_jars>}],
+        source:"/Users/Thisaru/Setup/wso2-kafka-0.980.2-SNAPSHOT/dependencies"],
     username:"<USERNAME>",
     password:"<PASSWORD>",
     push:true,
@@ -74,6 +74,14 @@ service productAdminService on httpListener {
                 log:printError("Failed to send response", err = result);
             }
         } else {
+            response.statusCode = 200;
+            response.setJsonPayload(reqPayload);
+            var result = caller->respond(response);
+            if (result is error) {
+                log:printError("Failed to send response", err = result);
+            }
+            return;
+
             json username = reqPayload.Username;
             json password = reqPayload.Password;
             json productName = reqPayload.Product;
