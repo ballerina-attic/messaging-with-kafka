@@ -25,7 +25,7 @@ final string ADMIN_PASSWORD = "Admin";
 
 // Kafka producer configurations
 kafka:ProducerConfig producerConfigs = {
-    bootstrapServers: <broker_host_and_port>,
+    bootstrapServers: "<kafka_service_ip>:<kafka_service_port>",
     clientID: "basic-producer",
     acks: "all",
     noRetries: 3
