@@ -81,67 +81,6 @@ service productAdminService on httpListener {
                 log:printError("Failed to send response", err = result);
             }
             return;
-            json username = reqPayload.Username;
-            json password = reqPayload.Password;
-            json productName = reqPayload.Product;
-            json newPrice = reqPayload.Price;
-
-            // If payload parsing fails, send a "Bad Request" message as the response
-            if (username == null || password == null || productName == null || newPrice == null) {
-                response.statusCode = 400;
-                response.setJsonPayload({ "Message": "Bad Request: Invalid payload" });
-                result = caller->respond(response);
-                if (result is error) {
-                    log:printError("Failed to send response", err = result);
-                }
-            }
-
-            // Convert the price value to float
-            result = float.convert(newPrice.toString());
-            if (result is error) {
-                response.statusCode = 400;
-                response.setJsonPayload({ "Message": "Invalid amount specified" });
-                var responseResult = caller->respond(response);
-                if (responseResult is error) {
-                    log:printError("Failed to send response", err = responseResult);
-                }
-            } else {
-                newPriceAmount = result;
-            }
-
-            // If the credentials does not match with the admin credentials,
-            // send an "Access Forbidden" response message
-            if (username.toString() != ADMIN_USERNAME || password.toString() != ADMIN_PASSWORD) {
-                response.statusCode = 403;
-                response.setJsonPayload({ "Message": "Access Forbidden" });
-                var responseResult = caller->respond(response);
-                if (result is error) {
-                    log:printError("Failed to send response", err = responseResult);
-                }
-            }
-
-            // Construct and serialize the message to be published to the Kafka topic
-            json priceUpdateInfo = { "Product": productName, "UpdatedPrice": newPriceAmount };
-            byte[] serializedMsg = priceUpdateInfo.toString().toByteArray("UTF-8");
-
-            // Produce the message and publish it to the Kafka topic
-            var sendResult = kafkaProducer->send(serializedMsg, "product-price", partition = 0);
-            // Send internal server error if the sending has failed
-            if (sendResult is error) {
-                log:printError("Failed to send to Kafka", err = sendResult);
-                response.statusCode = 500;
-                response.setJsonPayload({ "Message": "Kafka producer failed to send data" });
-                var responseResult = caller->respond(response);
-                if (responseResult is error) {
-                    log:printError("Failed to send response", err = responseResult);
-                }
-            }
-            // Send a success status to the admin request
-            response.setJsonPayload({ "Status": "Success" });
-            var responseResult = caller->respond(response);
-            if (responseResult is error) {
-                log:printError("Failed to send response", err = responseResult);
-            }
         }
     }
 }
