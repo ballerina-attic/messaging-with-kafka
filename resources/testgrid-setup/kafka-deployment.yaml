@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: kafka1
-          image: wurstmeister/kafka
+          image: wurstmeister/kafka:latest
           ports:
             - containerPort: 9092
           env:
@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
         - name: kafka2
-          image: wurstmeister/kafka
+          image: wurstmeister/kafka:latest
           ports:
             - containerPort: 9092
           env:
