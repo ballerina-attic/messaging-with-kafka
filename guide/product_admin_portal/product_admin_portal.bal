@@ -118,19 +118,23 @@ service productAdminService on httpListener {
             byte[] serializedMsg = priceUpdateInfo.toString().toByteArray("UTF-8");
 
             // Produce the message and publish it to the Kafka topic
-            //var sendResult = kafkaProducer->send(serializedMsg, "product-price", partition = 0);
+            var sendResult = kafkaProducer->send(serializedMsg, "product-price", partition = 0);
             // Send internal server error if the sending has failed
-            //if (sendResult is error) {
-                log:printError("Failed to send to Kafka");
+            if (sendResult is error) {
+                log:printError("Failed to send to Kafka", err = sendResult);
                 response.statusCode = 500;
                 response.setJsonPayload({ "Message": "Kafka producer failed to send data" });
                 var responseResult = caller->respond(response);
                 if (responseResult is error) {
                     log:printError("Failed to send response", err = responseResult);
                 }
-            //}
+            }
             // Send a success status to the admin request
-            return;
+            response.setJsonPayload({ "Status": "Success" });
+            var responseResult = caller->respond(response);
+            if (responseResult is error) {
+                log:printError("Failed to send response", err = responseResult);
+            }
         }
     }
 }
