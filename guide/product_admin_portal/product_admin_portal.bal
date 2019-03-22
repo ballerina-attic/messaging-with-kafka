@@ -51,7 +51,7 @@ kafka:SimpleProducer kafkaProducer = new(producerConfigs);
     username:"<USERNAME>",
     password:"<PASSWORD>",
     push:true,
-    imagePullPolicy:"IfNotPresent"
+    imagePullPolicy:"Always"
 }
 
 // HTTP service endpoint
