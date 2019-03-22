@@ -20,6 +20,7 @@ metadata:
     app: kafka
 spec:
   ports:
-    - port: 2181
+    - targetPort: 2181
+      port: 9092
   selector:
     app: kafka
