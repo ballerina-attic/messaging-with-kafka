@@ -121,7 +121,7 @@ service productAdminService on httpListener {
             //var sendResult = kafkaProducer->send(serializedMsg, "product-price", partition = 0);
             // Send internal server error if the sending has failed
             //if (sendResult is error) {
-                log:printError("Failed to send to Kafka", err = sendResult);
+                log:printError("Failed to send to Kafka");
                 response.statusCode = 500;
                 response.setJsonPayload({ "Message": "Kafka producer failed to send data" });
                 var responseResult = caller->respond(response);
