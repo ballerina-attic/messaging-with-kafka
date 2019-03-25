@@ -12,21 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-kind: Service
+---
 apiVersion: v1
+kind: Service
 metadata:
-  name: zookeeper-1
+  name: zoo1
+  labels:
+    app: zookeeper-1
 spec:
-  type: LoadBalancer
   ports:
-    - name: port-2181
+    - name: client
       port: 2181
       protocol: TCP
-    - name: port-2888
+    - name: follower
       port: 2888
       protocol: TCP
-    - name: port-3888
+    - name: leader
       port: 3888
       protocol: TCP
   selector:
-    app: zookeeper1
+    app: zookeeper-1

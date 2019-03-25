@@ -12,28 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
-  name: zookeeper1
+  name: zookeeper-deployment-1
 spec:
-  replicas: 1
-  selector:
-    app: zookeeper1
   template:
     metadata:
       labels:
-        app: zookeeper1
+        app: zookeeper-1
     spec:
       containers:
-        - name: zookeeper1
+        - name: zoo1
           image: digitalwonderland/zookeeper
           ports:
             - containerPort: 2181
-            - containerPort: 2888
-            - containerPort: 3888
           env:
             - name: ZOOKEEPER_ID
               value: "1"
             - name: ZOOKEEPER_SERVER_1
-              value: zookeeper-1
+              value: zoo1
