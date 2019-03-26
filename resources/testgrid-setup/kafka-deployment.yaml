@@ -38,5 +38,3 @@ spec:
               value: zoo1:2181
             - name: KAFKA_BROKER_ID
               value: "1"
-            - name: KAFKA_CREATE_TOPICS
-              value: updatePrice:1:1
