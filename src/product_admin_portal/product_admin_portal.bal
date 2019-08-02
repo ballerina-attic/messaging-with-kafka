@@ -61,7 +61,6 @@ service productAdminService on httpListener {
                 var responseResult = caller->respond(response);
             } else {
                 // Convert the price value to float
-                //var result = float.convert(newPrice.toString());
                 var result = langfloat:fromString(newPrice.toString());
                 if (result is error) {
                     response.statusCode = 400;
