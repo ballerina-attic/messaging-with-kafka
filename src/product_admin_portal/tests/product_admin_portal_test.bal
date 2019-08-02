@@ -28,7 +28,7 @@ type Payload record {|
 http:Client httpClient = new http:Client("http://localhost:9090/product");
 
 // Function to test 'product_admin_portal' service
-@test:Config
+@test:Config {}
 function testProductAdminPortal () {
     // Initialize empty http request
     http:Request req = new();
@@ -36,7 +36,7 @@ function testProductAdminPortal () {
     // Test the 'updatePrice' resource
     // Construct a request payload
     Payload payload = { Username:"Admin", Password:"Admin", Product:"ABC", Price:100.00 };
-    json|error payloadJson = json.convert(payload);
+    json|error payloadJson = typedesc<json>.constructFrom(payload);
 
     if (payloadJson is error) {
         test:assertFail(msg = "Payload JSON returned error.");
