@@ -15,28 +15,28 @@
 // under the License.
 
 import ballerina/io;
-import wso2/kafka;
+import ballerina/kafka;
 import ballerina/encoding;
 
 // Kafka consumer listener configurations
 kafka:ConsumerConfig consumerConfig = {
-    bootstrapServers: "localhost:9092, localhost:9093",
+    bootstrapServers: "localhost:9092",
     // Consumer group ID
-    groupId: "franchisee1",
+    groupId: "franchisee2",
     // Listen from topic 'product-price'
     topics: ["product-price"],
     // Poll every 1 second
-    pollingInterval: 1000
+    pollingIntervalInMillis: 1000
 };
 
 // Create kafka listener
-listener kafka:SimpleConsumer consumer = new(consumerConfig);
+listener kafka:Consumer consumer = new(consumerConfig);
 
 // Kafka service that listens from the topic 'product-price'
-// 'FranchiseeService1' subscribed to new product price updates from the product admin
-service franchiseeService1 on consumer {
+// 'FranchiseeService2' subscribed to new product price updates from the product admin
+service franchiseeService2 on consumer {
     // Triggered whenever a message added to the subscribed topic
-    resource function onMessage(kafka:SimpleConsumer simpleConsumer, kafka:ConsumerRecord[] records) {
+    resource function onMessage(kafka:Consumer simpleConsumer, kafka:ConsumerRecord[] records) {
         // Dispatched set of Kafka records to service, We process each one by one.
         foreach var entry in records {
             byte[] serializedMsg = entry.value;
@@ -46,7 +46,7 @@ service franchiseeService1 on consumer {
             // log the retrieved Kafka record
             io:println("[INFO] Topic: " + entry.topic + "; Received Message: " + msg);
             // Acknowledgement
-            io:println("[INFO] Acknowledgement from Franchisee 1");
+            io:println("[INFO] Acknowledgement from Franchisee 2");
         }
     }
 }

@@ -31,9 +31,6 @@ In this example, the Ballerina Kafka Connector is used to connect Ballerina to A
 > **Tip**: For a better development experience, install one of the following Ballerina IDE plugins: [VSCode](https://marketplace.visualstudio.com/items?itemName=ballerina.ballerina), [IntelliJ IDEA](https://plugins.jetbrains.com/plugin/9520-ballerina)
 - [Apache Kafka](https://kafka.apache.org/downloads)
   * Download the binary distribution and extract the contents
-- [Ballerina Kafka Connector](https://github.com/wso2-ballerina/package-kafka/releases)
-  * Extract `wso2-kafka-<version>.zip`. Run the install.{sh/bat} script to install the package.
-
 
 ### Optional Requirements
 
@@ -49,7 +46,7 @@ In this example, the Ballerina Kafka Connector is used to connect Ballerina to A
 Ballerina is a complete programming language that supports custom project structures. Use the following package structure for this guide.
 ```
 messaging-with-kafka
- └── guide
+ └── src
       ├── franchisee1
       │    └── franchisee1.bal
       ├── franchisee2
@@ -62,12 +59,9 @@ messaging-with-kafka
                 └── product_admin_portal_test.bal
 
 ```
-
-- Create the above directories in your local machine and also create empty `.bal` files.
-
-- Then open the terminal and navigate to `messaging-with-kafka/guide` and run Ballerina project initializing toolkit.
+- Open the terminal and create a ballerina project named 'messaging-with-kafka'.
 ```bash
-   $ ballerina init
+   $ ballerina new messaging-with-kafka
 ```
 
 ### Implementation
@@ -85,14 +79,14 @@ kafka:ConsumerConfig consumerConfig = {
     // Listen from topic 'product-price'
     topics: ["product-price"],
     // Poll every 1 second
-    pollingInterval: 1000
+    pollingIntervalInMillis: 1000
 };
 
 // Create kafka listener
 listener kafka:SimpleConsumer consumer = new(consumerConfig);
 ```
 
-A Kafka subscriber in Ballerina needs to consist of a `kafka:SimpleConsumer` listener with providing required configurations for a Kafka subscriber. 
+A Kafka subscriber in Ballerina needs to consist of a `kafka:Consumer` listener with providing required configurations for a Kafka subscriber. 
 
 The `bootstrapServers` field provides the list of host and port pairs, which are the addresses of the Kafka brokers in a "bootstrap" Kafka cluster. 
 
@@ -100,14 +94,14 @@ The `groupId` field specifies the Id of the consumer group.
 
 The `topics` field specifies the topics that must be listened by this consumer. 
 
-The `pollingInterval` field is the time interval that a consumer polls the topic. 
+The `pollingIntervalInMillis` field is the time interval that a consumer polls the topic. 
 
 Let's now see the complete implementation of the `inventory_control_system`, which is a Kafka topic subscriber.
 
 ##### inventory_control_system.bal
 ```ballerina
 import ballerina/io;
-import wso2/kafka;
+import ballerina/kafka;
 import ballerina/encoding;
 
 // Kafka consumer listener configurations
@@ -118,18 +112,18 @@ kafka:ConsumerConfig consumerConfig = {
     // Listen from topic 'product-price'
     topics: ["product-price"],
     // Poll every 1 second
-    pollingInterval: 1000
+    pollingIntervalInMillis: 1000
 };
 
 // Create kafka listener
-listener kafka:SimpleConsumer consumer = new(consumerConfig);
+listener kafka:Consumer consumer = new(consumerConfig);
 
 // Kafka service that listens from the topic 'product-price'
 // 'inventoryControlService' subscribed to new product price updates from
 // the product admin and updates the Database.
 service kafkaService on consumer {
     // Triggered whenever a message added to the subscribed topic
-    resource function onMessage(kafka:SimpleConsumer simpleConsumer, kafka:ConsumerRecord[] records) {
+    resource function onMessage(kafka:Consumer simpleConsumer, kafka:ConsumerRecord[] records) {
         // Dispatched set of Kafka records to service, We process each one by one.
         foreach var entry in records {
             byte[] serializedMsg = entry.value;
@@ -168,14 +162,15 @@ kafka:ProducerConfig producerConfigs = {
 kafka:SimpleProducer kafkaProducer = new(producerConfigs);
 ```
 
-A Kafka producer in Ballerina needs to consist of a `kafka:SimpleProducer` object with specifying the required configurations for a Kafka publisher. 
+A Kafka producer in Ballerina needs to consist of a `kafka:Producer` object with specifying the required configurations for a Kafka publisher. 
 
 Let's now see the complete implementation of the `product_admin_portal`, which is a Kafka topic publisher. Inline comments added for better understanding.
 
 ##### product_admin_portal.bal
 ```ballerina
 import ballerina/http;
-import wso2/kafka;
+import ballerina/kafka;
+import ballerina/'lang\.float as langfloat;
 
 // Constants to store admin credentials
 final string ADMIN_USERNAME = "Admin";
@@ -189,7 +184,7 @@ kafka:ProducerConfig producerConfigs = {
     noRetries: 3
 };
 
-kafka:SimpleProducer kafkaProducer = new(producerConfigs);
+kafka:Producer kafkaProducer = new(producerConfigs);
 
 // HTTP service endpoint
 listener http:Listener httpListener = new(9090);
@@ -208,51 +203,51 @@ service productAdminService on httpListener {
             response.setJsonPayload({ "Message": "Invalid payload - Not a valid JSON payload" });
             var result = caller->respond(response);
         } else {
-            json username = reqPayload.Username;
-            json password = reqPayload.Password;
-            json productName = reqPayload.Product;
-            json newPrice = reqPayload.Price;
+            json|error username = reqPayload.Username;
+            json|error password = reqPayload.Password;
+            json|error productName = reqPayload.Product;
+            json|error newPrice = reqPayload.Price;
 
             // If payload parsing fails, send a "Bad Request" message as the response
-            if (username == null || password == null || productName == null || newPrice == null) {
+            if (username is error || password is error || productName is error || newPrice is error) {
                 response.statusCode = 400;
                 response.setJsonPayload({ "Message": "Bad Request: Invalid payload" });
                 var responseResult = caller->respond(response);
-            }
-
-            // Convert the price value to float
-            var result = float.convert(newPrice.toString());
-            if (result is error) {
-                response.statusCode = 400;
-                response.setJsonPayload({ "Message": "Invalid amount specified" });
-                var responseResult = caller->respond(response);
             } else {
-                newPriceAmount = result;
-            }
+		// Convert the price value to float
+		var result = langfloat:fromString(newPrice.toString());
+		if (result is error) {
+		    response.statusCode = 400;
+		    response.setJsonPayload({ "Message": "Invalid amount specified" });
+		    var responseResult = caller->respond(response);
+		} else {
+		    newPriceAmount = result;
+		}
 
-            // If the credentials does not match with the admin credentials,
-            // send an "Access Forbidden" response message
-            if (username.toString() != ADMIN_USERNAME || password.toString() != ADMIN_PASSWORD) {
-                response.statusCode = 403;
-                response.setJsonPayload({ "Message": "Access Forbidden" });
-                var responseResult = caller->respond(response);
-            }
+		// If the credentials does not match with the admin credentials,
+		// send an "Access Forbidden" response message
+		if (username.toString() != ADMIN_USERNAME || password.toString() != ADMIN_PASSWORD) {
+		    response.statusCode = 403;
+		    response.setJsonPayload({ "Message": "Access Forbidden" });
+		    var responseResult = caller->respond(response);
+		}
 
-            // Construct and serialize the message to be published to the Kafka topic
-            json priceUpdateInfo = { "Product": productName, "UpdatedPrice": newPriceAmount };
-            byte[] serializedMsg = priceUpdateInfo.toString().toByteArray("UTF-8");
+		// Construct and serialize the message to be published to the Kafka topic
+		json priceUpdateInfo = { "Product": productName, "UpdatedPrice": newPriceAmount };
+		byte[] serializedMsg = priceUpdateInfo.toString().toByteArray("UTF-8");
 
-            // Produce the message and publish it to the Kafka topic
-            var sendResult = kafkaProducer->send(serializedMsg, "product-price", partition = 0);
-            // Send internal server error if the sending has failed
-            if (sendResult is error) {
-                response.statusCode = 500;
-                response.setJsonPayload({ "Message": "Kafka producer failed to send data" });
-                var responseResult = caller->respond(response);
-            }
-            // Send a success status to the admin request
-            response.setJsonPayload({ "Status": "Success" });
-            var responseResult = caller->respond(response);
+		// Produce the message and publish it to the Kafka topic
+		var sendResult = kafkaProducer->send(serializedMsg, "product-price", partition = 0);
+		// Send internal server error if the sending has failed
+		if (sendResult is error) {
+		    response.statusCode = 500;
+		    response.setJsonPayload({ "Message": "Kafka producer failed to send data" });
+		    var responseResult = caller->respond(response);
+		}
+		// Send a success status to the admin request
+		response.setJsonPayload({ "Status": "Success" });
+		var responseResult = caller->respond(response);
+	    }
         }
     }
 }
@@ -285,11 +280,11 @@ service productAdminService on httpListener {
 ```
    Here we created a new topic that consists of two partitions with a single replication factor.
    
-- Start the `productAdminService`, which is an HTTP service that publishes messages to the Kafka topic by entering the following command from `messaging-with-kafka/guide` directory.
+- Start the `productAdminService`, which is an HTTP service that publishes messages to the Kafka topic by entering the following command from `messaging-with-kafka` directory.
 ```bash
    $ ballerina run product_admin_portal
 ```
-- Navigate to `messaging-with-kafka/guide` and run the following commands in separate terminals to start the topic subscribers.
+- Navigate to `messaging-with-kafka` and run the following commands in separate terminals to start the topic subscribers.
 ```bash
    $ ballerina run inventory_control_system
    $ ballerina run franchisee1
